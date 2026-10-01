@@ -1,0 +1,264 @@
+$env:"https://7uzc6wk9wb.execute-api.us-east-1.amazonaws.com/Deployment"
+$env:S3_API_KEY="BuVzJGSYYQ2TnUeTGO3wtaeEas2bEDLZbX3eyBHd"
+
+
+TERMINAL: 
+--------------
+
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> pip3 install boto3
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: boto3 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (1.43.69)
+Requirement already satisfied: botocore<1.44.0,>=1.43.69 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from boto3) (1.43.69)
+Requirement already satisfied: jmespath<2.0.0,>=0.7.1 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from boto3) (1.1.0)
+Requirement already satisfied: s3transfer<0.20.0,>=0.19.0 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from boto3) (0.19.2)
+Requirement already satisfied: python-dateutil<3.0.0,>=2.1 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from botocore<1.44.0,>=1.43.69->boto3) (2.9.0.post0)
+Requirement already satisfied: urllib3!=2.2.0,<3,>=1.25.4 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from botocore<1.44.0,>=1.43.69->boto3) (2.7.0)
+Requirement already satisfied: six>=1.5 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from python-dateutil<3.0.0,>=2.1->botocore<1.44.0,>=1.43.69->boto3) (1.17.0)
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> pip3 install pyodbc
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: pyodbc in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (5.3.0)
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python -c "import boto3; print('boto3 OK')"
+boto3 OK
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python -c "import pyodbc; print(pyodbc.drivers())"
+['SQL Server', 'Microsoft Access Driver (*.mdb, *.accdb)', 'Microsoft Excel Driver (*.xls, *.xlsx, *.xlsm, *.xlsb)', 'Microsoft Access Text Driver (*.txt, *.csv)', 'Microsoft Access dBASE Driver (*.dbf, *.ndx, *.mdx)', 'ODBC Driver 18 for SQL Server']
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:SQL_SERVER="localhost,1433"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:SQL_DATABASE="poc"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:SQL_USERNAME="sa"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:SQL_PASSWORD="jatin"                     
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> echo $env:SQL_SERVER
+localhost,1433
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> echo $env:SQL_DATABASE
+poc
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> echo $env:SQL_USERNAME
+sa
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:S3_BUCKET="tpci-zendesk-attachment"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:AWS_REGION="us-east-1"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> echo $env:S3_BUCKET
+tpci-zendesk-attachment
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> echo $env:AWS_REGION
+us-east-1
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> aws --version
+aws-cli/2.36.40 Python/3.14.6 Windows/11 script-exe/AMD64
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> aws sts get-caller-identity
+
+aws: [ERROR]: An error occurred (NoCredentials): Unable to locate credentials. You can configure credentials by running "aws login".
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> aws login
+Attempting to open your default browser. If the browser does not open, open the following URL.
+If you are unable to open the URL on this device, run this command again with the '--remote' option.
+
+https://us-east-1.signin.aws.amazon.com/v1/authorize?response_type=code&client_id=arn%3Aaws%3Asignin%3A%3A%3Adevtools%2Fsame-device&state=a0997e2d-afe7-44fe-82c5-5590153da491&code_challenge_method=SHA-256&scope=openid&redirect_uri=http%3A%2F%2F127.0.0.1%3A49675%2Foauth%2Fcallback&code_challenge=ZIMA52d4OILKk3MyblJCYxLs0dXxUhrEPQXMD46dv_g
+
+
+Updated profile default to use arn:aws:iam::135245990152:root credentials.
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> aws sts get-caller-identity
+{                                                                                                                                                                                                                                                     
+    "UserId": "135245990152",
+    "Account": "135245990152",
+    "Arn": "arn:aws:iam::135245990152:root"
+}
+
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:S3_BUCKET="tpci-zendesk-attachment"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> $env:AWS_REGION="us-east-1"
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> aws s3 ls s3://tpci-zendesk-attachment
+                           PRE 10001/
+                           PRE 12345/
+                           PRE 12346/
+                           PRE logs/
+                           PRE sql-export/
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python Sql_and_media_to_s3.py --mode media --media-folder "C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data"
+C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\Sql_and_media_to_s3.py:50: SyntaxWarning: "\m" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\m"? A raw string is also an option.
+  python sql_and_media_to_s3.py --mode media --media-folder .\media_files
+============================================================
+SQL SERVER + TICKET ATTACHMENTS -> AMAZON S3
+============================================================
+  Mode       : media
+  SQL Server : localhost,1433
+  Database   : poc
+  S3 Bucket  : tpci-zendesk-attachment
+  AWS Region : us-east-1
+  Dry run    : False
+
+------------------------------------------------------------
+PART 2 - LOCAL TICKET ATTACHMENTS -> S3
+------------------------------------------------------------
+  Source : C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data
+  Target : s3://tpci-zendesk-attachment/<ticket_id>/
+
+
+ERROR:
+  Unable to create the S3 client. Check your AWS credentials/profile.
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> C:\Python314\python.exe -m pip install --upgrade "boto3[crt]"
+Defaulting to user installation because normal site-packages is not writeable
+Requirement already satisfied: boto3[crt] in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (1.43.69)
+Collecting boto3[crt]
+  Downloading boto3-1.43.91-py3-none-any.whl.metadata (6.6 kB)
+Collecting botocore<1.44.0,>=1.43.91 (from boto3[crt])
+  Downloading botocore-1.43.91-py3-none-any.whl.metadata (5.6 kB)
+Requirement already satisfied: jmespath<2.0.0,>=0.7.1 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from boto3[crt]) (1.1.0)
+Requirement already satisfied: s3transfer<0.20.0,>=0.19.0 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from boto3[crt]) (0.19.2)
+Requirement already satisfied: python-dateutil<3.0.0,>=2.1 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from botocore<1.44.0,>=1.43.91->boto3[crt]) (2.9.0.post0)
+Requirement already satisfied: urllib3!=2.2.0,<3,>=1.25.4 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from botocore<1.44.0,>=1.43.91->boto3[crt]) (2.7.0)
+Collecting awscrt==0.36.0 (from botocore[crt]<2.0a0,>=1.21.0; extra == "crt"->boto3[crt])
+  Downloading awscrt-0.36.0-cp313-abi3-win_amd64.whl.metadata (11 kB)
+Requirement already satisfied: six>=1.5 in C:\Users\Jatin Sharma\AppData\Roaming\Python\Python314\site-packages (from python-dateutil<3.0.0,>=2.1->botocore<1.44.0,>=1.43.91->boto3[crt]) (1.17.0)
+Downloading boto3-1.43.91-py3-none-any.whl (140 kB)
+Downloading botocore-1.43.91-py3-none-any.whl (15.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.8/15.8 MB 5.7 MB/s  0:00:02
+Downloading awscrt-0.36.0-cp313-abi3-win_amd64.whl (4.3 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.3/4.3 MB 5.0 MB/s  0:00:00
+Installing collected packages: awscrt, botocore, boto3
+  Attempting uninstall: botocore
+    Found existing installation: botocore 1.43.69
+    Uninstalling botocore-1.43.69:
+      Successfully uninstalled botocore-1.43.69
+  Attempting uninstall: boto3
+    Found existing installation: boto3 1.43.69
+    Uninstalling boto3-1.43.69:
+      Successfully uninstalled boto3-1.43.69
+Successfully installed awscrt-0.36.0 boto3-1.43.91 botocore-1.43.91
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> C:\Python314\python.exe -c "import boto3; print(boto3.__version__)"
+1.43.91
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> C:\Python314\python.exe -c "import boto3; s=boto3.Session(); print('Boto3:',boto3.__version__); print('Profile:',s.profile_name); print('Credentials found:',s.get_credentials() is not None)"
+Boto3: 1.43.91
+Profile: default
+Credentials found: True
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python Sql_and_media_to_s3.py --mode media --media-folder "C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data"
+C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\Sql_and_media_to_s3.py:50: SyntaxWarning: "\m" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\m"? A raw string is also an option.
+  python sql_and_media_to_s3.py --mode media --media-folder .\media_files
+============================================================
+SQL SERVER + TICKET ATTACHMENTS -> AMAZON S3
+============================================================
+  Mode       : media
+  SQL Server : localhost,1433
+  Database   : poc
+  S3 Bucket  : tpci-zendesk-attachment
+  AWS Region : us-east-1
+  Dry run    : False
+
+------------------------------------------------------------
+PART 2 - LOCAL TICKET ATTACHMENTS -> S3
+------------------------------------------------------------
+  Source : C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data
+  Target : s3://tpci-zendesk-attachment/<ticket_id>/
+
+  12345 -> urbanSynapse.png
+    OK urbanSynapse.png (7.2 MB) -> s3://tpci-zendesk-attachment/12345/urbanSynapse.png
+  12346 -> copado.png
+    OK copado.png (0.1 MB) -> s3://tpci-zendesk-attachment/12346/copado.png
+  54321 -> videoplayback.mp4
+    OK videoplayback.mp4 (62.6 MB) -> s3://tpci-zendesk-attachment/54321/videoplayback.mp4
+
+============================================================
+FINAL SUMMARY
+============================================================
+  SQL tables  : OK 0 | FAILED 0
+  Attachments : OK 3 | FAILED 0
+  TOTAL       : OK 3 | FAILED 0
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python Sql_and_media_to_s3.py --mode media --media-folder "C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data"
+C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\Sql_and_media_to_s3.py:50: SyntaxWarning: "\m" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\m"? A raw string is also an option.
+  python sql_and_media_to_s3.py --mode media --media-folder .\media_files
+============================================================
+SQL SERVER + TICKET ATTACHMENTS -> AMAZON S3
+============================================================
+  Mode       : media
+  SQL Server : localhost,1433
+  Database   : poc
+  S3 Bucket  : tpci-zendesk-attachment
+  AWS Region : us-east-1
+  Dry run    : False
+
+------------------------------------------------------------
+PART 2 - LOCAL TICKET ATTACHMENTS -> S3
+------------------------------------------------------------
+  Source : C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data
+  Target : s3://tpci-zendesk-attachment/<ticket_id>/
+
+  12345 -> urbanSynapse.png
+    FAILED: You must specify a region.
+  12346 -> copado.png
+    FAILED: You must specify a region.
+  54321 -> Untitled.png
+    FAILED: You must specify a region.
+  54321 -> videoplayback.mp4
+    FAILED: You must specify a region.
+
+============================================================
+FINAL SUMMARY
+============================================================
+  SQL tables  : OK 0 | FAILED 0
+  Attachments : OK 0 | FAILED 4
+  TOTAL       : OK 0 | FAILED 4
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> aws s3api get-bucket-location --bucket tpci-zendesk-attachment
+{                                                                                                                                                                                                                                                     
+    "LocationConstraint": null
+}
+
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python Sql_and_media_to_s3.py --mode media --media-folder "C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data"
+C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\Sql_and_media_to_s3.py:50: SyntaxWarning: "\m" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\m"? A raw string is also an option.
+  python sql_and_media_to_s3.py --mode media --media-folder .\media_files
+============================================================
+SQL SERVER + TICKET ATTACHMENTS -> AMAZON S3
+============================================================
+  Mode       : media
+  SQL Server : localhost,1433
+  Database   : poc
+  S3 Bucket  : tpci-zendesk-attachment
+  AWS Region : us-east-1
+  Dry run    : False
+
+------------------------------------------------------------
+PART 2 - LOCAL TICKET ATTACHMENTS -> S3
+------------------------------------------------------------
+  Source : C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data
+  Target : s3://tpci-zendesk-attachment/<ticket_id>/
+
+  12345 -> urbanSynapse.png
+    OK urbanSynapse.png (7.2 MB) -> s3://tpci-zendesk-attachment/12345/urbanSynapse.png
+  12346 -> copado.png
+    OK copado.png (0.1 MB) -> s3://tpci-zendesk-attachment/12346/copado.png
+  23456 -> Untitled.png
+    OK Untitled.png (0.1 MB) -> s3://tpci-zendesk-attachment/23456/Untitled.png
+  54321 -> videoplayback.mp4
+    OK videoplayback.mp4 (62.6 MB) -> s3://tpci-zendesk-attachment/54321/videoplayback.mp4
+
+============================================================
+FINAL SUMMARY
+============================================================
+  SQL tables  : OK 0 | FAILED 0
+  Attachments : OK 4 | FAILED 0
+  TOTAL       : OK 4 | FAILED 0
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> python Sql_and_media_to_s3.py --mode media --media-folder "C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data"
+C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\Sql_and_media_to_s3.py:50: SyntaxWarning: "\m" is an invalid escape sequence. Such sequences will not work in the future. Did you mean "\\m"? A raw string is also an option.
+  python sql_and_media_to_s3.py --mode media --media-folder .\media_files
+============================================================
+SQL SERVER + TICKET ATTACHMENTS -> AMAZON S3
+============================================================
+  Mode       : media
+  SQL Server : localhost,1433
+  Database   : poc
+  S3 Bucket  : tpci-zendesk-attachment
+  AWS Region : us-east-1
+  Dry run    : False
+
+------------------------------------------------------------
+PART 2 - LOCAL TICKET ATTACHMENTS -> S3
+------------------------------------------------------------
+  Source : C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration\migration_data
+  Target : s3://tpci-zendesk-attachment/<ticket_id>/
+
+  12345 -> urbanSynapse.png
+    OK urbanSynapse.png (7.2 MB) -> s3://tpci-zendesk-attachment/12345/urbanSynapse.png
+  12346 -> copado.png
+    OK copado.png (0.1 MB) -> s3://tpci-zendesk-attachment/12346/copado.png
+  23456 -> Untitled.png
+    OK Untitled.png (0.1 MB) -> s3://tpci-zendesk-attachment/23456/Untitled.png
+  54321 -> videoplayback.mp4
+    OK videoplayback.mp4 (62.6 MB) -> s3://tpci-zendesk-attachment/54321/videoplayback.mp4
+
+============================================================
+FINAL SUMMARY
+============================================================
+  SQL tables  : OK 0 | FAILED 0
+  Attachments : OK 4 | FAILED 0
+  TOTAL       : OK 4 | FAILED 0
+PS C:\Users\Jatin Sharma\Desktop\Raptbot\Zendesk Data Migration> 
