@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS – Salesforce Data Migration | Step-by-Step Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f5f7fa;
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15);
+            padding: 2.5rem 2rem;
+        }
+        h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #0b1c2e;
+            border-bottom: 4px solid #0176d3;
+            padding-bottom: 0.75rem;
+            margin-bottom: 2rem;
+            letter-spacing: -0.02em;
+        }
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0b1c2e;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        h3 {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-top: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #334155;
+            margin-top: 1.2rem;
+            margin-bottom: 0.3rem;
+        }
+        p {
+            margin-bottom: 0.75rem;
+            color: #334155;
+        }
+        ul, ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+            color: #334155;
+        }
+        li {
+            margin-bottom: 0.3rem;
+        }
+        .step {
+            background: #f8fafc;
+            border-left: 4px solid #0176d3;
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        .step strong {
+            color: #0b1c2e;
+        }
+        .note {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-size: 0.95rem;
+            color: #78350f;
+        }
+        .note strong {
+            color: #92400e;
+        }
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem 1.25rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            margin: 1rem 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+        }
+        .code-block code {
+            font-family: inherit;
+        }
+        .code-label {
+            display: inline-block;
+            background: #1e293b;
+            color: #94a3b8;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .image-placeholder {
+            background: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+        .image-placeholder i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+        .badge {
+            display: inline-block;
+            background: #0176d3;
+            color: #ffffff;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.15rem 0.6rem;
+            border-radius: 9999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-right: 0.4rem;
+        }
+        .badge-green {
+            background: #10b981;
+        }
+        .badge-orange {
+            background: #f59e0b;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        @media (max-width: 700px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                padding: 1.5rem 1rem;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+            h2 {
+                font-size: 1.25rem;
+            }
+        }
+        .toc {
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid #e2e8f0;
+        }
+        .toc h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            border-bottom: none;
+            margin-bottom: 0.5rem;
+        }
+        .toc ul {
+            list-style: none;
+            margin-left: 0;
+            columns: 2;
+            column-gap: 2rem;
+        }
+        .toc li {
+            margin-bottom: 0.3rem;
+        }
+        .toc a {
+            color: #0176d3;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .toc a:hover {
+            text-decoration: underline;
+        }
+        .section-divider {
+            height: 1px;
+            background: #e2e8f0;
+            margin: 2.5rem 0;
+        }
+        .file-list {
+            background: #f1f5f9;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            margin: 0.75rem 0;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+        .file-list li {
+            margin-bottom: 0.2rem;
+        }
+        .arrow {
+            color: #0176d3;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>🚀 AWS – Salesforce Data Migration Guide</h1>
+    <p style="font-size:1.05rem; color:#475569; margin-bottom:2rem;">
+        Complete step-by-step walkthrough for migrating Zendesk attachments from AWS S3 to Salesforce using Lambda, API Gateway, and LWC.
+    </p>
+
+    <!-- TOC -->
+    <div class="toc">
+        <h2>📑 Table of Contents</h2>
+        <ul>
+            <li><a href="#part1">Part 1: AWS Setup (S3, IAM, Lambda, API Gateway)</a></li>
+            <li><a href="#s3">1. Create S3 Bucket</a></li>
+            <li><a href="#iam-policy">2. Create IAM Policy</a></li>
+            <li><a href="#iam-role">3. Create IAM Role</a></li>
+            <li><a href="#bucket-policy">4. Configure S3 Bucket Policy & CORS</a></li>
+            <li><a href="#lambda">5. Create Lambda Functions</a></li>
+            <li><a href="#api-gateway">6. Set Up API Gateway</a></li>
+            <li><a href="#api-keys">7. Generate API Key</a></li>
+            <li><a href="#part2">Part 2: Salesforce Setup</a></li>
+            <li><a href="#case-fields">8. Create Custom Fields on Case</a></li>
+            <li><a href="#apex-lwc">9. Apex Class & LWC Component</a></li>
+            <li><a href="#named-cred">10. Named Credentials & External Credential</a></li>
+            <li><a href="#remote-site">11. Remote Site & Trusted URLs</a></li>
+            <li><a href="#permission-set">12. Permission Set & Assignments</a></li>
+            <li><a href="#page-layout">13. Add LWC to Case Page Layout</a></li>
+            <li><a href="#part3">Part 3: Migrating to AWS SigV4 (AWS_IAM)</a></li>
+            <li><a href="#sigv4-aws">14. AWS: IAM User, Policy & API Gateway Auth</a></li>
+            <li><a href="#sigv4-sf">15. Salesforce: External Credential & Principal</a></li>
+        </ul>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PART 1: AWS SETUP -->
+    <!-- ============================================================ -->
+    <h2 id="part1">☁️ Part 1: AWS Setup</h2>
+
+    <!-- S3 Bucket -->
+    <h3 id="s3">1. Create S3 Bucket</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Click <strong>Services</strong> → select <strong>S3</strong> → click <strong>Create Bucket</strong>.</p>
+        <p><span class="badge">Step 2</span> Enter the <strong>Bucket name</strong> (e.g. <code>tpci-zendesk-attachments</code>), scroll down and click <strong>Create Bucket</strong>.</p>
+    </div>
+    <div class="image-placeholder">
+        <i>🖼️</i> AWS S3 Console – Create Bucket
+    </div>
+
+    <!-- IAM Policy -->
+    <h3 id="iam-policy">2. Create IAM Policy</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Navigate: <strong>Services</strong> → <strong>IAM</strong> → <strong>Policies</strong> → <strong>Create Policy</strong>.</p>
+        <p><span class="badge">Step 2</span> Switch to the <strong>JSON</strong> tab and paste the policy below. Click <strong>Next</strong>.</p>
+    </div>
+
+    <div class="code-label">📄 data-migration-policy.json</div>
+    <div class="code-block"><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": "arn:aws:s3:::tpci-zendesk-attachment"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:DeleteObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::tpci-zendesk-attachment/*"
+    }
+  ]
+}</code></div>
+    <div class="note">
+        <strong>⚠️ Note:</strong> Replace <code>tpci-zendesk-attachment</code> with your actual bucket name.
+    </div>
+    <div class="step">
+        <p><span class="badge">Step 3</span> Enter the policy <strong>Name</strong> and <strong>Description</strong>, then click <strong>Create policy</strong>.</p>
+    </div>
+
+    <!-- IAM Role -->
+    <h3 id="iam-role">3. Create IAM Role</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Navigate: <strong>Services</strong> → <strong>IAM</strong> → <strong>Roles</strong> → <strong>Create Role</strong>.</p>
+        <p><span class="badge">Step 2</span> Select <strong>Trusted entity type: AWS Service</strong> and <strong>Use Case: Lambda</strong>. Click <strong>Next</strong>.</p>
+        <p><span class="badge">Step 3</span> Attach the following policies:</p>
+        <ul>
+            <li><code>Data-migration-policy</code> (created above)</li>
+            <li><code>AWSLambdaBasicExecutionRole</code></li>
+        </ul>
+        <p><span class="badge">Step 4</span> Click <strong>Next</strong>, enter a <strong>Role Name</strong> (e.g. <code>Data-migration-permission-role</code>), and click <strong>Create Role</strong>.</p>
+    </div>
+
+    <!-- Bucket Policy & CORS -->
+    <h3 id="bucket-policy">4. Configure S3 Bucket Policy &amp; CORS</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Open the S3 bucket → <strong>Permissions</strong> tab → click <strong>Edit</strong> in <strong>Bucket Policy</strong>.</p>
+        <p><span class="badge">Step 2</span> Paste the following policy and click <strong>Save</strong>.</p>
+    </div>
+
+    <div class="code-label">📄 Bucket Policy</div>
+    <div class="code-block"><code>{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AllowLambdaS3Operations",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "arn:aws:iam::135245990152:role/Data-migration-permission-role"
+      },
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": [
+        "arn:aws:s3:::tpci-zendesk-attachment",
+        "arn:aws:s3:::tpci-zendesk-attachment/*"
+      ]
+    },
+    {
+      "Sid": "S3PolicyStmt-DO-NOT-MODIFY-1788342145068",
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "logging.s3.amazonaws.com"
+      },
+      "Action": "s3:PutObject",
+      "Resource": "arn:aws:s3:::tpci-zendesk-attachment/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:SourceAccount": "13524430152"
+        }
+      }
+    }
+  ]
+}</code></div>
+    <div class="note">
+        <strong>🔑 Important:</strong> Replace the AWS Account ID (<code>135245990152</code>), role name (<code>Data-migration-permission-role</code>), and bucket name (<code>tpci-zendesk-attachment</code>) with your own values.
+    </div>
+
+    <div class="step">
+        <p><span class="badge">Step 3</span> Scroll down to <strong>Cross-origin resource sharing (CORS)</strong> → click <strong>Edit</strong> → paste the config below → click <strong>Save</strong>.</p>
+    </div>
+
+    <div class="code-label">📄 CORS Configuration</div>
+    <div class="code-block"><code>[
+  {
+    "AllowedHeaders": ["*"],
+    "AllowedMethods": ["PUT", "POST", "GET", "HEAD", "DELETE"],
+    "AllowedOrigins": [
+      "https://*.salesforce.com",
+      "https://*.force.com",
+      "https://*.lightning.force.com"
+    ],
+    "ExposeHeaders": ["ETag"],
+    "MaxAgeSeconds": 3000
+  }
+]</code></div>
+
+    <!-- Lambda Functions -->
+    <h3 id="lambda">5. Create Lambda Functions</h3>
+    <p>Create <strong>4 Lambda functions</strong> using the same IAM execution role (<code>Data-migration-permission-role</code>). Each function needs the environment variable <code>BUCKET_NAME</code> set to your S3 bucket name.</p>
+
+    <h4>5.1 <code>listFilesForRecord</code></h4>
+    <div class="code-label">📄 index.mjs</div>
+    <div class="code-block"><code>import { S3Client, ListObjectsV2Command, HeadObjectCommand } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({});
+const BUCKET_NAME = process.env.BUCKET_NAME;
+
+export const handler = async (event) => {
+  try {
+    const zendeskId = event.queryStringParameters?.zendeskId || event.zendeskId;
+
+    if (!zendeskId || zendeskId.trim() === "") {
+      return respond(400, { error: "zendeskId is required." });
+    }
+
+    const prefix = `${zendeskId}/`;
+    const command = new ListObjectsV2Command({
+      Bucket: BUCKET_NAME,
+      Prefix: prefix,
+    });
+
+    const result = await s3.send(command);
+
+    const rawFiles = (result.Contents || []).filter(
+      (obj) => obj.Key !== prefix && obj.Size > 0
+    );
+
+    const files = await Promise.all(
+      rawFiles.map(async (obj) => {
+        let zendeskTicketCreateDate = null;
+        try {
+          const head = await s3.send(new HeadObjectCommand({
+            Bucket: BUCKET_NAME,
+            Key: obj.Key,
+          }));
+          zendeskTicketCreateDate = head.Metadata?.["zendesk-ticket-create-date"] || null;
+        } catch (headErr) {
+          console.error(`HeadObject failed for ${obj.Key}:`, headErr);
+        }
+
+        return {
+          fileName: obj.Key.replace(prefix, ""),
+          fileSizeBytes: obj.Size,
+          lastModified: obj.LastModified,
+          key: obj.Key,
+          zendeskTicketCreateDate: zendeskTicketCreateDate,
+        };
+      })
+    );
+
+    return respond(200, { files, count: files.length });
+  } catch (err) {
+    console.error("List files error:", err);
+    return respond(502, { error: "Unable to list files right now. Please try again." });
+  }
+};
+
+function respond(statusCode, body) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    },
+    body: JSON.stringify(body),
+  };
+}</code></div>
+
+    <h4>5.2 <code>previewFile</code></h4>
+    <div class="code-label">📄 index.mjs</div>
+    <div class="code-block"><code>import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3 = new S3Client({});
+const BUCKET_NAME = process.env.BUCKET_NAME;
+
+export const handler = async (event) => {
+  try {
+    let body;
+    try {
+      body = event.body ? JSON.parse(event.body) : event;
+    } catch {
+      return respond(400, { error: "Invalid request body." });
+    }
+
+    const { zendeskId, s3Key, disposition } = body;
+
+    if (!zendeskId || !s3Key) {
+      return respond(400, { error: "zendeskId and s3Key are required." });
+    }
+
+    const expectedPrefix = `${zendeskId}/`;
+    if (!s3Key.startsWith(expectedPrefix)) {
+      return respond(403, { error: "Invalid file reference." });
+    }
+
+    const safeFileName = s3Key.split('/').pop();
+    const contentDisposition = disposition === 'attachment'
+      ? `attachment; filename="${safeFileName}"`
+      : `inline; filename="${safeFileName}"`;
+
+    const command = new GetObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      ResponseContentDisposition: contentDisposition,
+    });
+
+    const presignedUrl = await getSignedUrl(s3, command, { expiresIn: 900 });
+    const expiresAt = new Date(Date.now() + 900 * 1000).toISOString();
+
+    return respond(200, { presignedUrl, expiresAt });
+  } catch (err) {
+    console.error("Preview error:", err);
+    return respond(502, { error: "Unable to generate preview link. Please try again." });
+  }
+};
+
+function respond(statusCode, body) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify(body),
+  };
+}</code></div>
+
+    <h4>5.3 <code>uploadFile</code></h4>
+    <div class="code-label">📄 index.mjs</div>
+    <div class="code-block"><code>import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+
+const s3 = new S3Client({});
+const BUCKET_NAME = process.env.BUCKET_NAME;
+
+export const handler = async (event) => {
+  try {
+    let body;
+    try {
+      body = event.body ? JSON.parse(event.body) : event;
+    } catch {
+      return respond(400, { error: "Invalid request body." });
+    }
+
+    const { zendeskId, fileName, contentType, zendeskTicketCreateDate } = body;
+
+    if (!zendeskId || !zendeskId.trim()) {
+      return respond(400, { error: "zendeskId is required." });
+    }
+    if (!fileName || !fileName.trim()) {
+      return respond(400, { error: "fileName is required." });
+    }
+
+    const safeFileName = fileName.trim().replace(/[\/\\]/g, "_");
+    const s3Key = `${zendeskId.trim()}/${safeFileName}`;
+
+    const metadata = {
+      "zendesk-id": zendeskId.trim(),
+    };
+    if (zendeskTicketCreateDate) {
+      metadata["zendesk-ticket-create-date"] = String(zendeskTicketCreateDate);
+    }
+
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+      ContentType: contentType || "application/octet-stream",
+      Metadata: metadata,
+    });
+
+    const uploadUrl = await getSignedUrl(s3, command, {
+      expiresIn: 900,
+      unhoistableHeaders: new Set(
+        Object.keys(metadata).map(key => `x-amz-meta-${key}`)
+      ),
+    });
+
+    return respond(200, {
+      uploadUrl,
+      s3Key,
+      fileName: safeFileName,
+    });
+  } catch (err) {
+    console.error("Generate upload URL error:", err);
+    return respond(502, { error: "Unable to generate upload URL. Please try again." });
+  }
+};
+
+function respond(statusCode, body) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "OPTIONS, POST",
+    },
+    body: JSON.stringify(body),
+  };
+}</code></div>
+
+    <h4>5.4 <code>deleteFile</code></h4>
+    <div class="code-label">📄 index.mjs</div>
+    <div class="code-block"><code>import { S3Client, DeleteObjectCommand } from "@aws-sdk/client-s3";
+
+const s3 = new S3Client({});
+const BUCKET_NAME = process.env.BUCKET_NAME;
+
+export const handler = async (event) => {
+  try {
+    let body;
+    try {
+      body = event.body ? JSON.parse(event.body) : event;
+    } catch {
+      return respond(400, { error: "Invalid request body." });
+    }
+
+    const { zendeskId, s3Key } = body;
+
+    if (!zendeskId || !s3Key) {
+      return respond(400, { error: "zendeskId and s3Key are required." });
+    }
+
+    const expectedPrefix = `${zendeskId}/`;
+    if (!s3Key.startsWith(expectedPrefix)) {
+      return respond(403, { error: "Invalid file reference." });
+    }
+
+    const command = new DeleteObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: s3Key,
+    });
+    await s3.send(command);
+
+    return respond(200, { success: true, deletedKey: s3Key });
+  } catch (err) {
+    console.error("Delete error:", err);
+    return respond(502, { error: "Unable to delete file. Please try again." });
+  }
+};
+
+function respond(statusCode, body) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+    },
+    body: JSON.stringify(body),
+  };
+}</code></div>
+
+    <div class="note">
+        <strong>⚙️ Environment Variables:</strong> For each Lambda function, go to <strong>Configuration → Environment variables → Edit</strong> and add:
+        <ul>
+            <li><code>BUCKET_NAME</code> = <code>tpci-zendesk-attachment</code></li>
+        </ul>
+    </div>
+
+    <!-- API Gateway -->
+    <h3 id="api-gateway">6. Set Up API Gateway</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Navigate: <strong>Services</strong> → <strong>API Gateway</strong> → <strong>Create an API</strong>.</p>
+        <p><span class="badge">Step 2</span> Choose <strong>REST API</strong> (not HTTP API).</p>
+        <p><span class="badge">Step 3</span> Fill in <strong>API Name</strong>: <code>data-migration-api</code> → click <strong>Create API</strong>.</p>
+        <p><span class="badge">Step 4</span> Click <strong>Create Resource</strong>.</p>
+        <p><span class="badge">Step 5</span> Fill in <strong>Resource Name</strong>: <code>files</code>, enable <strong>CORS</strong>, click <strong>Create Resource</strong>.</p>
+        <p><span class="badge">Step 6</span> With <code>/files</code> selected, click <strong>Create Method</strong>.</p>
+        <ul>
+            <li><strong>Method Type:</strong> GET</li>
+            <li><strong>Integration Type:</strong> Lambda function</li>
+            <li><strong>Lambda Proxy Integration:</strong> Enable</li>
+            <li><strong>Lambda function:</strong> <code>listFilesForRecord</code></li>
+        </ul>
+        <p>Click <strong>Create method</strong>.</p>
+        <p><span class="badge">Step 7</span> Create a <strong>DELETE</strong> method for <code>/files</code> with Lambda <code>deleteFile</code>.</p>
+        <p><span class="badge">Step 8</span> Create two more resources under <code>/files</code>:</p>
+        <ul>
+            <li><code>/files/preview</code> → POST → Lambda <code>previewFile</code></li>
+            <li><code>/files/upload</code> → POST → Lambda <code>uploadFile</code></li>
+        </ul>
+        <p><span class="badge">Step 9</span> Click <strong>Deploy API</strong>. Select <strong>New Stage</strong>, name it <code>Deployment</code>, click <strong>Deploy</strong>.</p>
+        <p><span class="badge">Step 10</span> Copy the <strong>Invoke URL</strong> — you'll need it for Salesforce.</p>
+    </div>
+    <div class="image-placeholder">
+        <i>🔗</i> API Gateway – Deployment Stage &amp; Invoke URL
+    </div>
+
+    <!-- API Key -->
+    <h3 id="api-keys">7. Generate API Key</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> In API Gateway, click <strong>API Keys</strong> → <strong>Create API Key</strong>.</p>
+        <p><span class="badge">Step 2</span> Name: <code>salesforce-key</code> → select <strong>Auto generate</strong> → click <strong>Save</strong>.</p>
+        <p><span class="badge">Step 3</span> Copy the API Key and store it securely for Salesforce setup.</p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- PART 2: SALESFORCE SETUP -->
+    <!-- ============================================================ -->
+    <div class="section-divider"></div>
+    <h2 id="part2">⚡ Part 2: Salesforce Setup</h2>
+
+    <!-- Custom Fields -->
+    <h3 id="case-fields">8. Create Custom Fields on Case</h3>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Login to Salesforce → click <strong>Gear Icon</strong> → <strong>Setup</strong> → <strong>Object Manager</strong>.</p>
+        <p><span class="badge">Step 2</span> Search for <strong>Case</strong> → <strong>Fields &amp; Relationships</strong> → <strong>New</strong>.</p>
+    </div>
+
+    <h4>8.1 Zendesk Id (Text)</h4>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Data Type: <strong>Text</strong> → Next.</p>
+        <p><span class="badge">Step 2</span> Field Label: <code>Zendesk Id</code>, Length: <code>100</code>, Field Name: <code>Zendesk_Id</code> → Next.</p>
+        <p><span class="badge">Step 3</span> Select profiles for FLS → Next.</p>
+        <p><span class="badge">Step 4</span> Select Page Layouts → <strong>Save &amp; New</strong>.</p>
+    </div>
+
+    <h4>8.2 ZD Case Created Date (Date)</h4>
+    <div class="step">
+        <p><span class="badge">Step 1</span> Data Type: <strong>Date</strong> → Next.</p>
+        <p><span class="badge">Step 2</span> Field Label: <code>ZD Case Created Date</code>, Field Name: <code>Zendesk_Case_Created_Date</code> → Next.</p>
+        <p><span class="badge">Step 3</span> Select profiles for FLS → Next.</p>
+        <p><span class="badge">Step 4</span> Select Page Layouts → <strong>Save</strong>.</p>
+    </div>
+
+    <!-- Apex & LWC -->
+    <h3 id="apex-lwc">9. Apex Class &amp; LWC Component</h3>
+    <p>Create these in your Salesforce org using VS Code with the Salesforce Extension Pack.</p>
+
+    <h4>9.1 Apex Class: <code>S3FileViewerController</code></h4>
+    <div class="code-label">📄 S3FileViewerController.cls</div>
+    <div class="code-block"><code>public with sharing class S3FileViewerController {
+
+    private static final String NameCredential = 'callout:AWS_API_Gateway';
+    private static final String FILES_KEY = 'files';
+
+    public class S3FileItem {
+        @AuraEnabled public String key;
+        @AuraEnabled public String fileName;
+        @AuraEnabled public Long fileSizeBytes;
+        @AuraEnabled public String lastModified;
+        @AuraEnabled public String zendeskTicketCreateDate;
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static List&lt;S3FileItem&gt; listS3Files(String zendeskId) {
+        if (String.isBlank(zendeskId)) {
+            throw new AuraHandledException('Zendesk ID is required.');
+        }
+
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint(NameCredential + '/files?zendeskId=' + EncodingUtil.urlEncode(zendeskId.trim(), 'UTF-8'));
+        req.setMethod('GET');
+        req.setTimeout(30000);
+
+        HttpResponse res;
+        try {
+            res = new Http().send(req);
+        } catch (Exception e) {
+            throw new AuraHandledException('Callout failed: ' + e.getMessage() + '. Check Remote Site Settings and Named Credential.');
+        }
+
+        if (res.getStatusCode() != 200) {
+            throw new AuraHandledException(
+                'List files failed [HTTP ' + res.getStatusCode() + ']: ' + res.getBody()
+            );
+        }
+
+        Map&lt;String, Object&gt; parsed;
+        try {
+            parsed = (Map&lt;String, Object&gt;) JSON.deserializeUntyped(res.getBody());
+        } catch (Exception e) {
+            throw new AuraHandledException('Failed to parse list response: ' + e.getMessage());
+        }
+
+        List&lt;Object&gt; rawFiles = (List&lt;Object&gt;) parsed.get(FILES_KEY);
+        if (rawFiles == null || rawFiles.isEmpty()) {
+            return new List&lt;S3FileItem&gt;();
+        }
+
+        List&lt;S3FileItem&gt; items = new List&lt;S3FileItem&gt;();
+        for (Object rawFile : rawFiles) {
+            Map&lt;String, Object&gt; f = (Map&lt;String, Object&gt;) rawFile;
+            S3FileItem item = new S3FileItem();
+            item.key = (String) f.get('key');
+            item.fileName = (String) f.get('fileName');
+            item.fileSizeBytes = (Long) f.get('fileSizeBytes');
+            item.lastModified = (String) f.get('lastModified');
+            item.zendeskTicketCreateDate = (String) f.get('zendeskTicketCreateDate');
+            items.add(item);
+        }
+        return items;
+    }
+
+    @AuraEnabled(cacheable=false)
+    public static Map&lt;String, String&gt; getPresignedUrl(String s3Key, Integer ttl, String disposition) {
+        if (String.isBlank(s3Key)) {
+            throw new AuraHandledException('s
